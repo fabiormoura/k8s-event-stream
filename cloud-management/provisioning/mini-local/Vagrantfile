@@ -1,0 +1,42 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+ENV['WORKING_DIR'] = ENV['VAGRANT_CWD'] || Dir.pwd
+
+require_relative File.join('..', 'lib', 'vagrant', 'servers_list')
+require_relative File.join('..', 'lib', 'vagrant', 'vagrant_server_configuration_decider')
+require_relative File.join('..', 'lib', 'vagrant', 'ansible_servers_configuration_decider')
+
+$subnet = '172.168.10'
+$box = 'centos/7'
+
+servers = ServersList.new(
+  subnet: $subnet,
+  servers: [
+    {
+      prefix: 'mini-local-server',
+      instances: 1,
+      tags: ['etcd', 'kube-master', 'kube-node'],
+      settings: { memory: 3072 , cpus: 2 }
+    }
+  ]
+)
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure('2') do |config|
+  config.ssh.insert_key = false
+  config.vm.box = $box
+
+  # plugin conflict
+  if Vagrant.has_plugin?('vagrant-vbguest')
+    config.vbguest.auto_update = false
+  end
+
+  servers.all.each do |server|
+    VagrantServerConfigurationDecider.new(server: server).decide(vagrant_context: config)
+  end
+  AnsibleServersConfigurationDecider.new(servers: servers).decide(vagrant_context: config)
+end

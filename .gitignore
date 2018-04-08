@@ -1,1 +1,3 @@
 .idea
+cloud-management/provisioning/**/.vagrant
+cloud-management/provisioning/**/.volumes

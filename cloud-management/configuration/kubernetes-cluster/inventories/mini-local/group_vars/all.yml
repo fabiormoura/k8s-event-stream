@@ -1,0 +1,26 @@
+bootstrap_os: centos
+ignore_assert_errors: true
+efk_enabled: false
+helm_enabled: true
+kube_network_plugin: calico
+kube_log_level: 2
+kube_oidc_auth: false
+kube_basic_auth: true
+kube_api_pwd: "admin"
+kube_users:
+  kube:
+    pass: "{{kube_api_pwd}}"
+    role: admin
+    groups:
+      - system:masters
+kube_apiserver_node_port_range: "80-49251"
+helm_version: "v2.8.2"
+kube_api_runtime_config:
+  - admissionregistration.k8s.io/v1alpha1=true
+kube_apiserver_admission_control:
+  - NamespaceLifecycle
+  - LimitRanger
+  - ServiceAccount
+  - DefaultStorageClass
+  - ResourceQuota
+  - Initializers
